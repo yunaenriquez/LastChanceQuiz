@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Rides - RideShare{% endblock %}
+{% block user_role %}My Rides{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h2 class="mb-4">My Rides</h2>
+
+    <!-- Status filter buttons -->
+    <div class="mb-3">
+        <a href="{% url 'ride-list' %}" class="btn btn-outline-primary {% if not request.GET.status %}active{% endif %}">All</a>
+        {% for key, label in status_filters %}
+            <a href="{% url 'ride-list' %}?status={{ key }}" class="btn btn-outline-primary {% if request.GET.status == key %}active{% endif %}">
+                {{ label }}
+            </a>
+        {% endfor %}
+    </div>
+
+    <!-- Messages/Alerts -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Rides Table -->
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">Ride ID</th>
+                    <th scope="col">Customer</th>
+                    <th scope="col">Rider</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ride in rides %}
+                <tr>
+                    <td>{{ ride.id }}</td>
+                    <td>{{ ride.customer.get_full_name }}</td>
+                    <td>{{ ride.rider.get_full_name|default:"-" }}</td>
+                    <td>{{ ride.created_at|date:"M d, Y H:i" }}</td>
+                    <td>
+                        <span class="badge 
+                            {% if ride.status == 'COMPLETED' %}bg-success
+                            {% elif ride.status == 'ONGOING' %}bg-warning
+                            {% elif ride.status == 'ACCEPTED' %}bg-info
+                            {% elif ride.status == 'CANCELLED' %}bg-danger
+                            {% else %}bg-secondary{% endif %}">
+                            {{ ride.status }}
+                        </span>
+                    </td>
+                    <td>₱{{ ride.price|default:"0.00" }}</td>
+                    <td>
+                        <a href="{% url 'ride-detail' ride.id %}" class="btn btn-sm btn-primary">View</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">No rides found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Ride pagination">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Previous</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            {% endif %}
+
+            {% for num in paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{ num }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Next</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Next</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+</div>
+{% endblock %}

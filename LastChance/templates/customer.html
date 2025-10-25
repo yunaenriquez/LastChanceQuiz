@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Customer Dashboard - Biyahero{% endblock %}
+{% block user_role %}Customer Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex" id="dashboard-wrapper">
+
+    <!-- Sidebar -->
+    <nav id="sidebar" class="bg-dark text-white vh-100 p-3 flex-shrink-0">
+        <h4 class="text-center mb-4">IkotIkotLang</h4>
+        <ul class="nav flex-column">
+            <li class="nav-item mb-2">
+                <a href="{% url 'customer-dashboard' %}"
+                   class="nav-link text-white {% if request.resolver_match.url_name == 'customer-dashboard' %}active bg-secondary rounded{% endif %}">
+                    <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item mb-2">
+                <a href="{% url 'create-ride' %}"
+                   class="nav-link text-white {% if request.resolver_match.url_name == 'create-ride' %}active bg-secondary rounded{% endif %}">
+                    <i class="bi bi-plus-circle me-2"></i> Request Ride
+                </a>
+            </li>
+            <li class="nav-item mb-2">
+                <a href="{% url 'customer-active-rides' %}"
+                   class="nav-link text-white {% if request.resolver_match.url_name == 'customer-active-rides' %}active bg-secondary rounded{% endif %}">
+                    <i class="bi bi-car-front me-2"></i> Active Rides
+                </a>
+            </li>
+            <li class="nav-item mb-2">
+                <a href="{% url 'customer-history' %}"
+                   class="nav-link text-white {% if request.resolver_match.url_name == 'customer-history' %}active bg-secondary rounded{% endif %}">
+                    <i class="bi bi-clock-history me-2"></i> Ride History
+                </a>
+            </li>
+            <hr class="border-light">
+            <li class="nav-item mb-2">
+                <a href="{% url 'profile' %}"
+                   class="nav-link text-white {% if request.resolver_match.url_name == 'profile' %}active bg-secondary rounded{% endif %}">
+                    <i class="bi bi-person-circle me-2"></i> My Profile
+                </a>
+            </li>
+            <li class="nav-item">
+                <span class="nav-link text-white disabled">
+                    <i class="bi bi-wallet2 me-2"></i> Balance: ₱{{ request.user.balance|default:"0.00" }}
+                </span>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="flex-grow-1 p-4">
+
+
+        <div class="mb-4">
+            <h2>Welcome, {{ request.user.get_full_name }}</h2>
+            <p class="text-muted">Manage your rides and check your balance here.</p>
+        </div>
+
+        <!-- Dashboard Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="card shadow-sm text-white bg-primary h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Current Balance</h5>
+                        <p class="display-6">₱{{ request.user.balance|default:"0.00" }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm text-white bg-success h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Active Rides</h5>
+                        <p class="display-6">{{ active_rides_count|default:"0" }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm text-white bg-info h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Total Rides</h5>
+                        <p class="display-6">{{ total_rides_count|default:"0" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Rides Table -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                Recent Rides
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Ride ID</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ride in recent_rides %}
+                                <tr>
+                                    <td>{{ ride.id }}</td>
+                                    <td>{{ ride.created_at|date:"M d, Y H:i" }}</td>
+                                    <td>{{ ride.status }}</td>
+                                    <td>₱{{ ride.price|default:"0.00" }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">No rides yet.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    #sidebar {
+        min-width: 220px;
+    }
+    #sidebar .nav-link.active {
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
