@@ -20,7 +20,7 @@ from django.urls import path, include
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 
-from remedial import settings
+from LastC import settings
 
 def redirect_to_signin(request):
     return redirect('signin')
